@@ -1,6 +1,8 @@
-# CloudProject
+## Realtime Twitter Stream Analysis System
 
-Term Project for **COMP7305 Cluster and Cloud Computing**.
+Forked from my term Project for **COMP7305 Cluster and Cloud Computing**.
+
+And I'll continue to finish and test my ideas here.
 
 ### Environment
 
@@ -20,28 +22,15 @@ Term Project for **COMP7305 Cluster and Cloud Computing**.
 [![](https://img.shields.io/badge/Stomp-2.3.3-ff69b4.svg)](http://stomp.github.io)
 [![](https://img.shields.io/badge/Echarts-4.2.1-ff69b4.svg)](https://echarts.baidu.com)
 
-## Title : Realtime Twitter Stream Analysis System
-
-Developed By:
+### Teammates:
 
   - [@GaryGao](https://github.com/GaryGao829)
-  - [@lexkaing](https://github.com/AlexTK2012)
+  - [@lexkaing](http://alextk2012.github.io)
   - [@BZbyr](https://github.com/BZbyr)
   - [@Yang Xiangyu](https://github.com/ulysses1881826)
   
 ### Project Structure
  
- ```
- .
-├── CloudWeb
-├── Collector
-├── HBaser
-├── StreamProcessorFlink
-├── StreamProcessorSpark
-|
-└── pom.xml(Maven parent POM)
-
- ```
  - __CloudWeb__: 
    - Show statistics data and sentiment analysis result.
  - __Collector__:
@@ -53,36 +42,12 @@ Developed By:
    - Train and generate Naive Bayes Model.
    - Analyze sentiment of Twitter.
    
-### Cluster Website
-
-Need to connect with cs vpn.
-
-[Spring Boot WebSite](http://202.45.128.135:20907/)
-
-[Ganglia Cluster Monitor](http://202.45.128.135:20007/ganglia/)
-
-[Namenode INFO](http://202.45.128.135:20107/dfshealth.html#tab-overview)
-
-[Hadoop Application](http://202.45.128.135:20207/cluster)
-
-[Hadoop JobHistory](http://202.45.128.135:20307/jobhistory)
-
-[Spark History Server](http://202.45.128.135:20507/)
-
-[Flink Server](http://202.45.128.135:20807/)
 
 ### Project Documents
 
 [Proposal](https://docs.google.com/document/d/1zzrZSWjRAz3FpL2EyyuIOGwQPduTtCBiCcYJMfmvA4I/edit?usp=sharing)
 
-[Meeting Record](https://docs.google.com/document/d/1NkYv8v_0XF8zxkrgxPIUUTsgPG1U0NvSgCrm8yrpxfo/edit?usp=sharing)
-
 [Prensentation PPT](https://docs.google.com/presentation/d/13iHaXcwX7a4WkaIA79BHxhsM9GSiKSfBs25j12pviWY/edit?usp=sharing)
-
-
-[地理查询 API](http://jwd.funnyapi.com/#/index)
-
-[环境信息](https://docs.google.com/spreadsheets/d/1ikzBeQ43pcnHpoRPA4PIFMfDF4OV6SeimAASWj7pVvA/edit#gid=0)
 
 ### Related Project
 
@@ -98,9 +63,13 @@ Need to connect with cs vpn.
 
 ### Data
 
- [train data](http://help.sentiment140.com/for-students)
+ - [Navie Bayes Data](http://help.sentiment140.com/for-students) 用于Spark 提前训练.
  
- 数据走向:
+ - Stanford Core NLP 模型路径，maven 依赖中 [stanford-corenlp-models](https://stanfordnlp.github.io/CoreNLP/download.html)
+ 
+ - Deep Learning 模型```手动生成``` [词向量]()
+     
+
  
  ```
  Flume-> Kafka -> Spark Streaming -> Kafka  
@@ -135,49 +104,28 @@ Need to connect with cs vpn.
 
 - [Flume Conf](https://gist.github.com/AlexTK2012/1d3288f0e474b4ad66db80950b402230)
 
-- HDFS 配置项
-
-    - Naive Bayes 模型路径 ```/tweets_sentiment/NBModel/```
-
-    - Naive Bayes 训练/测试文件路径 ```/data/training.1600000.processed.noemoticon.csv```
-    
-    - Stanford Core NLP 模型路径，maven 依赖中 [stanford-corenlp-models](https://stanfordnlp.github.io/CoreNLP/download.html)
-    
-    - Deep Learning 模型&词向量路径 ```/tweets_sentiment/dl4j/```
-
 ### Run
 
-0. Modify Zsh Environment
-```sh
-#使用zsh, 自定义环境变量需要修改:
-vi ~/sh/env_zsh 
-```
-
-1. Start *Flume* to collect twitter data and transport into *Kafka*.
+* Start *Flume* to collect twitter data and transport into *Kafka*.
 
 ```sh
-# read boot_flume_sh
 nohup flume-ng agent -f /opt/spark-twitter/7305CloudProject/Collector/TwitterToKafka.conf -Dflume.root.logger=DEBUG,console -n a1 >> flume.log 2>&1 &
 ```
 
-2. Start *Spark Streaming* to analysis twitter text sentiment using stanford nlp & naive bayes.
+* Start *Spark Streaming* to analysis twitter text sentiment using stanford nlp & naive bayes.
 
 ```sh
-单机模式
-spark-submit --class "hk.hku.spark.TweetSentimentAnalyzer" --master local[3] /opt/spark-twitter/7305CloudProject/StreamProcessorSpark/target/StreamProcessorSpark-jar-with-dependencies.jar
-
-集群模式
 spark-submit --class "hk.hku.spark.TweetSentimentAnalyzer" --master yarn --deploy-mode cluster --num-executors 2 --executor-memory 4g --executor-cores 4 --driver-memory 4g --conf spark.kryoserializer.buffer.max=2048 --conf spark.yarn.executor.memoryOverhead=2048 /opt/spark-twitter/7305CloudProject/StreamProcessorSpark/target/StreamProcessorSpark-jar-with-dependencies.jar
 ```
 
-3. Start *CloudWeb* to show the result on the [website](http://202.45.128.135:20907).
-
-```sh
-cd /opt/spark-twitter/7305CloudProject/CloudWeb/target
-nohup java -Xmx3072m -jar /opt/spark-twitter/7305CloudProject/CloudWeb/target/CloudWeb-1.0-SNAPSHOT.jar & 
-```
-
-4. Start *Flink* 
+* Start *Flink* 
 ```sh
 flink run /opt/spark-twitter/7305CloudProject/StreamProcessorFlink/target/StreamProcessorFlink-1.0-SNAPSHOT.jar
 ```
+
+* Start *CloudWeb* to show the result on the website.
+
+```sh
+nohup java -Xmx3072m -jar /opt/spark-twitter/7305CloudProject/CloudWeb/target/CloudWeb-1.0-SNAPSHOT.jar & 
+```
+

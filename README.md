@@ -67,7 +67,7 @@ And I'll continue to finish and test my ideas here.
  
  - Stanford Core NLP 模型路径，maven 依赖中 [stanford-corenlp-models](https://stanfordnlp.github.io/CoreNLP/download.html)
  
- - Deep Learning 模型```手动生成``` [词向量]()
+ - Deep Learning 模型```手动生成``` [词向量](https://github.com/mmihaltz/word2vec-GoogleNews-vectors/archive/master.zip)
      
 
  
